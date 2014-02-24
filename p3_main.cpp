@@ -1,4 +1,3 @@
-#include "Ordered_list.h"
 #include "Record.h"
 #include "Collection.h"
 #include "Utility.h"
@@ -13,6 +12,7 @@
 #include <vector>
 #include <algorithm>
 #include <iterator>
+#include <functional>
 #include <new>
 
 using std::string;
@@ -25,7 +25,7 @@ using std::set; using std::list; using std::vector;
 using std::find_if; using std::lower_bound; using std::for_each; using std::transform; using std::unique_copy;
 using std::ostream_iterator;
 using namespace::std::placeholders;
-
+using std::bind; using std::mem_fn;
 
 
 // compare two records by ID
@@ -311,8 +311,11 @@ void delete_Record_from_Library(Database_t &database)
     auto library_title_iterator = database.library_ordered_by_title.find(&probe);
     if (library_title_iterator == database.library_ordered_by_title.end())
         throw Title_exception("No record with that title!");
-    if (apply_if_arg(database.catalog.begin(), database.catalog.end(), check_record_in_Collection,
-                     *library_title_iterator))
+    //if (apply_if_arg(database.catalog.begin(), database.catalog.end(), check_record_in_Collection,
+    //                 *library_title_iterator))
+        
+        
+    if (find_if(database.catalog.begin(), database.catalog.end(), bind(&Collection::is_member_present, _1, *library_title_iterator)) != database.catalog.end())
         throw Title_exception("Cannot delete a record that is a member of a collection!");
     int record_ID = (*library_title_iterator)->get_ID();
     Record *delete_pointer = * library_title_iterator;
@@ -322,10 +325,11 @@ void delete_Record_from_Library(Database_t &database)
     cout << "Record " << record_ID << " " << title << " deleted" << endl;
 }
 
+/*
 bool check_record_in_Collection (Collection collection, Record *arg_ptr)
 {
     return collection.is_member_present(arg_ptr);
-}
+}*/
 
 // delete the specified collection from the Catalog
 void delete_Collection_from_Catalog(Database_t &database)
@@ -351,9 +355,16 @@ void delete_Record_from_Collection(Database_t &database)
 // Clear the Library. If collections are not empty, throw exception
 void clear_Library(Database_t &database)
 {
-    if (apply_if(database.catalog.begin(), database.catalog.end(), check_Collection_empty))
+    //if (apply_if(database.catalog.begin(), database.catalog.end(), check_Collection_empty))
+        
+        
+        
+    if (find_if_not(database.catalog.begin(), database.catalog.end(), mem_fn(&Collection::empty)) != database.catalog.end())
         throw Error("Cannot clear all records unless all collections are empty!");
-    apply(database.library_ordered_by_title.begin(), database.library_ordered_by_title.end(), free_Record);
+    //apply(database.library_ordered_by_title.begin(), database.library_ordered_by_title.end(), free_Record);
+    
+    for_each(database.library_ordered_by_title.begin(), database.library_ordered_by_title.end(), [](Record *record_ptr){free(record_ptr);});
+    
     database.library_ordered_by_title.clear();
     database.library_ordered_by_id.clear();
     Record::reset_ID_counter();
@@ -437,8 +448,10 @@ void restore_all_data(Database_t &database)
             database.catalog.push_back(new_collection);
         }
         input_file.close();
-        apply(local_library_ordered_by_title.begin(),
-              local_library_ordered_by_title.end(), free_Record);
+        //apply(local_library_ordered_by_title.begin(),
+              //local_library_ordered_by_title.end(), free_Record);
+        for_each(database.library_ordered_by_title.begin(), database.library_ordered_by_title.end(), [](Record *record_ptr){free(record_ptr);});
+
         cout << "Data loaded" <<endl;
     } catch (Error &error) {
         clear_all_data(database);

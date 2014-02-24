@@ -7,7 +7,6 @@ Collection objects manage their own Record container.
 The container of Records is not available to clients.
 */
 
-#include "Ordered_list.h"
 #include "Utility.h"
 #include <string>
 #include <fstream>
