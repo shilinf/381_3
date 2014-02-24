@@ -232,6 +232,7 @@ void print_Catalog(Database_t &database)
 // print memory allocations
 void print_memory_allocation(Database_t &database)
 {
+    cout << "Memory allocations:" <<endl;
     cout << "Records: " << database.library_ordered_by_title.size() <<endl;
     cout << "Collections: " << database.catalog.size() << endl;
 }
@@ -465,7 +466,7 @@ void restore_all_data(Database_t &database)
         input_file.close();
         //apply(local_library_ordered_by_title.begin(),
               //local_library_ordered_by_title.end(), free_Record);
-        for_each(database.library_ordered_by_title.begin(), database.library_ordered_by_title.end(), [](Record *record_ptr){free(record_ptr);});
+        for_each(local_library_ordered_by_title.begin(), local_library_ordered_by_title.end(), [](Record *record_ptr){free(record_ptr);});
 
         cout << "Data loaded" <<endl;
     } catch (Error &error) {
