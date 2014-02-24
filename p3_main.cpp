@@ -561,7 +561,8 @@ void trim_title(string &title)
     unique_copy(title.begin(), title.end(), trimmed_string.begin(), [](char &a, char &b) {return a == b && a == ' ';});
     //cout <<title.substr(0, title.find_last_not_of(' '))<<"!!!! "<<endl;
     size_t beginning = trimmed_string.find_first_not_of(' ');
-    title = trimmed_string.substr(beginning, trimmed_string.find_last_not_of(' ') + 1 - beginning);
+    if (beginning != string::npos)
+        title = trimmed_string.substr(beginning, trimmed_string.find_last_not_of(' ') + 1 - beginning);
     
     
     
