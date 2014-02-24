@@ -560,7 +560,7 @@ void trim_title(string &title)
     string trimmed_string(title.size(), ' ');
     unique_copy(title.begin(), title.end(), trimmed_string.begin(), [](char &a, char &b) {return a == b && a == ' ';});
     //cout <<title.substr(0, title.find_last_not_of(' '))<<"!!!! "<<endl;
-    title = trimmed_string.substr(0, trimmed_string.find_last_not_of(' ') + 1);
+    title = trimmed_string.substr(trimmed_string.find_first_not_of(' '), trimmed_string.find_last_not_of(' ') + 1);
     
     
     
