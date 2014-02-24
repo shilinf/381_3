@@ -82,6 +82,8 @@ Ordered_by_id_lib_t::iterator probe_Record_by_id(int id, Ordered_by_id_lib_t &li
 void read_and_check_integer(int &id_input);
 void read_check_title(string &title);
 void trim_title(string &title);
+void clear_Library_helper(Database_t &database);
+void clear_all_data_helper(Database_t &database);
 
 bool compare_record_with_id(Record *record_ptr, int id);
 
@@ -352,8 +354,7 @@ void delete_Record_from_Collection(Database_t &database)
     <<" deleted" << endl;
 }
 
-// Clear the Library. If collections are not empty, throw exception
-void clear_Library(Database_t &database)
+void clear_Library_helper(Database_t &database)
 {
     //if (apply_if(database.catalog.begin(), database.catalog.end(), check_Collection_empty))
         
@@ -370,6 +371,13 @@ void clear_Library(Database_t &database)
     Record::reset_ID_counter();
 }
 
+// Clear the Library. If collections are not empty, throw exception
+void clear_Library(Database_t &database)
+{
+    clear_Library_helper(database);
+    cout <<"All records deleted" <<endl;
+}
+
 bool check_Collection_empty (Collection collection)
 {
     return !collection.empty();
@@ -380,14 +388,21 @@ bool check_Collection_empty (Collection collection)
 void clear_Catalog(Database_t &database)
 {
     database.catalog.clear();
+    cout << "All collections deleted" <<endl;
 }
 
 // clear all data: first clear the Catalog as in cC,
 // then clear the Library as in cL
 void clear_all_data(Database_t &database)
 {
-    clear_Catalog(database);
-    clear_Library(database);
+    clear_all_data_helper(database);
+    cout << "All data deleted" <<endl;
+}
+
+void clear_all_data_helper(Database_t &database)
+{
+    database.catalog.clear();
+    clear_Library_helper(database);
 }
 
 // save all data: write the Library and Catalog data to the named file
@@ -454,7 +469,7 @@ void restore_all_data(Database_t &database)
 
         cout << "Data loaded" <<endl;
     } catch (Error &error) {
-        clear_all_data(database);
+        clear_all_data_helper(database);
         database.library_ordered_by_title.swap(local_library_ordered_by_title);
         database.library_ordered_by_id.swap(local_library_ordered_by_id);
         database.catalog.swap(local_catalog);
@@ -473,7 +488,7 @@ void free_Record(Record *record_ptr)
 // containers themselves, so that all memory is deallocated, and then terminate
 void quit(Database_t &database)
 {
-    clear_all_data(database);
+    clear_all_data_helper(database);
     cout << "All data deleted" << endl;
     cout << "Done" << endl;
 }
