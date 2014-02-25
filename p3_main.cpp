@@ -663,7 +663,7 @@ void list_ratings(Database_t &database)
         vector<Record *> library_ordered_by_rate(library_size);
         copy(database.library_ordered_by_title.begin(), database.library_ordered_by_title.end(),library_ordered_by_rate.begin());
         stable_sort(library_ordered_by_rate.begin(), library_ordered_by_rate.end(), [](Record* r1, Record *r2){return r1->get_rate() > r2->get_rate();});
-        cout << "Library contains " << library_size << " records:" <<endl;
+        //cout << "Library contains " << library_size << " records:" <<endl;
         for_each(library_ordered_by_rate.begin(), library_ordered_by_rate.end(), print_Record_helper);
     }
 }
