@@ -223,8 +223,6 @@ void print_Records(Database_t &database)
         cout << "Library is empty" << endl;
     else {
         cout << "Library contains " << database.library_ordered_by_title.size() << " records:" <<endl;
-        //for (auto record_ptr : database.library_ordered_by_title)
-        //    cout << *record_ptr <<endl;
         for_each(database.library_ordered_by_title.begin(), database.library_ordered_by_title.end(), print_Record_helper);
     }
 }
@@ -511,8 +509,6 @@ Catalog_t::iterator find_collection_iterator(Catalog_t &catalog)
 {
     string collection_name;
     cin >> collection_name;
-    //Collection find_temp(collection_name);
-    //catalog_iterator = catalog.find(find_temp);
     auto catalog_iterator = find_if(catalog.begin(), catalog.end(), [&collection_name](Collection &collection){return collection_name == collection.get_name();});
     if (catalog_iterator == catalog.end())
         throw Error("No collection with that name!");
@@ -626,14 +622,10 @@ void find_with_string(Database_t &database)
     string key_word;
     cin >> key_word;
     bool no_record_match = true;
-    for_each(key_word.begin(), key_word.end(), tolower); // whether it change the original string???
     
     transform(key_word.begin(), key_word.end(), key_word.begin(), tolower);
     
-    //for_each(database.library_ordered_by_title.begin(), database.library_ordered_by_title.end(), )
-    
-    //cout << key_word <<endl;
-    //considering put compare into Record class
+
     for(Record *record_ptr: database.library_ordered_by_title) {
         string lower_title = record_ptr->get_title();
         transform(lower_title.begin(), lower_title.end(), lower_title.begin(), tolower);
@@ -655,7 +647,6 @@ void list_ratings(Database_t &database)
         vector<Record *> library_ordered_by_rate(library_size);
         copy(database.library_ordered_by_title.begin(), database.library_ordered_by_title.end(),library_ordered_by_rate.begin());
         stable_sort(library_ordered_by_rate.begin(), library_ordered_by_rate.end(), [](Record* r1, Record *r2){return r1->get_rate() > r2->get_rate();});
-        //cout << "Library contains " << library_size << " records:" <<endl;
         for_each(library_ordered_by_rate.begin(), library_ordered_by_rate.end(), print_Record_helper);
     }
 }
@@ -694,7 +685,7 @@ void modify_title(Database_t &database)
         throw Title_exception("Library already has a record with this title!");
 
     Record *old_record = *library_id_iterator;
-    Record *new_record = new Record(**library_id_iterator, new_title);
+    Record *new_record = new Record(*old_record, new_title);
     auto library_title_iterator = probe_Record_by_title(old_record->get_title(), database.library_ordered_by_title);
     
     

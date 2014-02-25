@@ -1,11 +1,13 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 /* Utility functions, constants, and classes used by more than one other modules */
-#include <unordered_set>
+
+#include "Record.h"
+#include <map>
 #include <iostream>
+#include <algorithm>
 
 // a simple class for error exceptions - msg points to a C-string error message
-class Record;
 
 struct Error {
 	Error(const char* msg_ = "") :
@@ -23,26 +25,28 @@ struct Title_exception {
 
 class Collection_Statist {
 public:
-    Collection_Statist(): total_records_in_collection(0), num_frequent_appear_records(0) {}
+    Collection_Statist(): total_records_in_collection(0) {}
     void operator() (Record *record_ptr)
     {
         ++total_records_in_collection;
-        //std::cout << "falsdfjsdalfjasdlf???????????????"<<std::endl;
-        if (records_appeared.find(record_ptr) == records_appeared.end())
-            records_appeared.insert(record_ptr);
+        int record_id = record_ptr->get_ID();
+        std::map<int, int>::iterator find_iterator = records_appeared.find(record_id);
+        if (find_iterator == records_appeared.end())
+            records_appeared.insert(std::make_pair(record_id, 1));
         else
-            ++num_frequent_appear_records;
+            ++find_iterator->second;
     }
     int get_total_occurance() const
     {return total_records_in_collection;}
-    int get_num_frequent_records() const
-    {return num_frequent_appear_records;}
+    long get_num_frequent_records() const
+    {
+        return std::count_if(records_appeared.begin(), records_appeared.end(), [](std::pair<int, int> id_count){return id_count.second > 1;});
+    }
     size_t get_num_records_in_collection() const
     {return records_appeared.size();}
 private:
     int total_records_in_collection;
-    int num_frequent_appear_records;
-    std::unordered_set<Record *> records_appeared;
+    std::map<int, int> records_appeared;
 };
 
 // Compare two objects (passed by const&) using T's operator<
