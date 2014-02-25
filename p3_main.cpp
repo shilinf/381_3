@@ -706,8 +706,8 @@ void modify_title(Database_t &database)
     
     for_each(database.catalog.begin(), database.catalog.end(), bind(&Collection::modify_title, _1, ref(old_record), ref(new_record)));
     
-    delete old_record;
     cout <<"Title for record "<<old_record->get_ID()<< " changed to " << new_title <<endl;
+    delete old_record;
 }
 
 
