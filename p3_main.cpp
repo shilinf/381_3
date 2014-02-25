@@ -326,23 +326,17 @@ void modify_Record_rating(Database_t &database)
 // delete the specified record from the Library
 void delete_Record_from_Library(Database_t &database)
 {
-    //string title = read_check_title();
-    //Record probe(title);
+
     auto library_title_iterator = read_title_probe_Record(database.library_ordered_by_title);
-    //if (library_title_iterator == database.library_ordered_by_title.end())
-    //    throw Title_exception("No record with that title!");
-    //if (apply_if_arg(database.catalog.begin(), database.catalog.end(), check_record_in_Collection,
-    //                 *library_title_iterator))
-        
-        
+    
     if (find_if(database.catalog.begin(), database.catalog.end(), bind(&Collection::is_member_present, _1, *library_title_iterator)) != database.catalog.end())
         throw Title_exception("Cannot delete a record that is a member of a collection!");
     int record_ID = (*library_title_iterator)->get_ID();
     Record *delete_pointer = * library_title_iterator;
     database.library_ordered_by_title.erase(library_title_iterator);
     database.library_ordered_by_id.erase(probe_Record_by_id(record_ID, database.library_ordered_by_id));
-    delete delete_pointer;
     cout << "Record " << record_ID << " " << (*library_title_iterator)->get_title() << " deleted" << endl;
+    delete delete_pointer;
 }
 
 /*
@@ -545,8 +539,6 @@ Ordered_by_title_lib_t::iterator probe_Record_by_title(string title, Ordered_by_
 Ordered_by_title_lib_t::iterator read_title_probe_Record(Ordered_by_title_lib_t &library)
 {
     string title = read_check_title();
-    //Record probe(title);
-    //auto library_iterator = library.find(&probe);
     auto library_iterator = probe_Record_by_title(title, library);
     if (library_iterator == library.end())
         throw Title_exception("No record with that title!");
@@ -714,6 +706,7 @@ void modify_title(Database_t &database)
     
     for_each(database.catalog.begin(), database.catalog.end(), bind(&Collection::modify_title, _1, ref(old_record), ref(new_record)));
     
+    delete old_record;
     cout <<"Title for record "<<old_record->get_ID()<< " changed to " << new_title <<endl;
 }
 
