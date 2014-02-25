@@ -26,6 +26,8 @@ public:
 	Throw Error exception if invalid data discovered in file.
 	string data input is read directly into the member variable. */
     Collection(std::ifstream& is, const std::set<Record*, Less_than_ptr<Record*>>& library);
+    
+    Collection(const Collection& c1, const Collection& c2, const std::string& name_);
 
 	// Accessors
 	std::string get_name() const
@@ -43,6 +45,10 @@ public:
 	// discard all members
 	void clear()
         {members.clear();}
+    
+    void get_collection_statist(Collection_Statist &statist) const;
+    
+    void modify_title(Record *old_record, Record *new_record);
 
 	// Write a Collections's data to a stream in save format, with endl as specified.
 	void save(std::ostream& os) const;

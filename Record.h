@@ -31,6 +31,9 @@ public:
 	// The static member variable used for new ID numbers will be set to the saved
 	// record ID if the saved record ID is larger than the static member variable value.
 	Record(std::ifstream& is);
+    
+    
+    Record(const Record &old, const std::string& title_);
 	
 	// These declarations help ensure that Record objects are unique
 	Record(const Record&) = delete;	// disallow copy construction
@@ -41,6 +44,8 @@ public:
 	// Accessors
 	int get_ID() const
         {return ID;}
+    int get_rate() const
+        {return rate;};
 	std::string get_title() const
         {return title;}
 	// reset the ID counter
@@ -54,6 +59,9 @@ public:
         {ID_counter = ID_counter_backup;}
 	// if the rating is not between 1 and 5 inclusive, an exception is thrown
 	void set_rating(int rating_);
+    
+    void set_title(std::string &title_)
+        {title = title_;}
 	
 	// Write a Record's data to a stream in save format with final endl.
 	// The record number is saved.

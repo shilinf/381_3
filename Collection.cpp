@@ -4,10 +4,18 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <algorithm>
+#include <iterator>
+#include <functional>
+
 
 using std::endl;
 using std::string;
 using std::set;
+using std::for_each; using std::copy; using std::set_union;
+using std::bind;
+using std::ostream_iterator; using std::inserter;
+using std::ref;
 
 
 Collection::Collection(std::ifstream& is, const set<Record*, Less_than_ptr<Record*>>& library)
@@ -26,6 +34,13 @@ Collection::Collection(std::ifstream& is, const set<Record*, Less_than_ptr<Recor
         add_member(*find_Record_item_iterator);
     }
 }
+
+Collection::Collection(const Collection& c1, const Collection& c2, const std::string& name_): name(name_)
+{
+    set_union(c1.members.begin(), c1.members.end(), c2.members.begin(), c2.members.end(), inserter(members, members.begin()));
+}
+
+
 
 void Collection::add_member(Record* record_ptr)
 {
@@ -48,11 +63,22 @@ void Collection::remove_member(Record* record_ptr)
         throw Error("Record is not a member in the collection!");
 }
 
+void Collection::modify_title(Record *old_record, Record *new_record)
+{
+    if (is_member_present(old_record)) {
+        members.erase(members.find(old_record));
+        members.insert(new_record);
+    }
+}
+
+
 void Collection::save(std::ostream& os) const
 {
     os << name << " " << members.size() << endl;
-    for (auto record_ptr : members)
-        os << record_ptr->get_title() << endl;
+    //for (auto record_ptr : members)
+    //    os << record_ptr->get_title() << endl;
+    
+    for_each(members.begin(), members.end(), [&os](Record *record_ptr){os << record_ptr->get_title() << endl;});
 }
 
 std::ostream& operator<< (std::ostream& os, const Collection& collection)
@@ -62,8 +88,16 @@ std::ostream& operator<< (std::ostream& os, const Collection& collection)
         os << " None" << endl;
     else {
         os << endl;
-        for (auto record_ptr : collection.members)
-            os << *record_ptr <<endl;
+        
+        for_each(collection.members.begin(), collection.members.end(), [&os](Record *record_ptr){os << *record_ptr << endl;});
     }
     return os;
 }
+
+
+void Collection::get_collection_statist(Collection_Statist &statist) const
+{
+    for_each(members.begin(), members.end(), ref(statist));
+}
+
+
