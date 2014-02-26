@@ -288,6 +288,19 @@ Catalog_t::iterator read_check_new_collection_name(Catalog_t &catalog, string &n
 }
 
 
+
+Catalog_t::iterator read_check_collection_name(Catalog_t &catalog)
+{
+    string collection_name;
+    auto catalog_iterator = find_collection_iterator(catalog, collection_name);
+    if (catalog_iterator != catalog.end() && catalog_iterator->get_name() == collection_name) {
+            //cout << catalog_iterator->get_name()<<"1"<<endl;
+        return catalog_iterator;
+    }
+    else
+        throw Error("No collection with that name!");
+}
+
 // Find the iterator from catalog with the specified collection name.
 // throw exception if the collection doesn't exist
 Catalog_t::iterator find_collection_iterator(Catalog_t &catalog, string &collection_name)
@@ -296,16 +309,6 @@ Catalog_t::iterator find_collection_iterator(Catalog_t &catalog, string &collect
     Collection probe(collection_name);
     auto catalog_iterator = lower_bound(catalog.begin(), catalog.end(), probe);
     return catalog_iterator;
-}
-
-Catalog_t::iterator read_check_collection_name(Catalog_t &catalog)
-{
-    string collection_name;
-    auto catalog_iterator = find_collection_iterator(catalog, collection_name);
-    if (catalog_iterator != catalog.end() && catalog_iterator->get_name() == collection_name)
-        return catalog_iterator;
-    else
-        throw Error("No collection with that name!");
 }
 
 
@@ -618,11 +621,12 @@ void combine_collections(Database_t &database)
 {
     Catalog_t::iterator catalog_iterator1 = read_check_collection_name(database.catalog);
     Catalog_t::iterator catalog_iterator2 = read_check_collection_name(database.catalog);
+    string collection1_name = catalog_iterator1->get_name();
+    string collection2_name = catalog_iterator2->get_name();
     string new_collection_name;
     auto insert_position = read_check_new_collection_name(database.catalog, new_collection_name);
     database.catalog.insert(insert_position, Collection(*catalog_iterator1, *catalog_iterator2, new_collection_name));
-    cout << "Collections "<< catalog_iterator1->get_name() <<" and "<< catalog_iterator2->get_name() <<" combined into new collection "<< new_collection_name << endl;
-
+    cout << "Collections "<< collection1_name<<" and "<< collection2_name <<" combined into new collection "<< new_collection_name << endl;
 }
 
 void modify_title(Database_t &database)
