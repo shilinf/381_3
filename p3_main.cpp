@@ -22,7 +22,7 @@ using std::ifstream; using std::ofstream;
 using std::isspace;
 using std::make_pair;
 using std::set; using std::list; using std::vector; using std::map; using std::unordered_set;
-using std::find_if; using std::lower_bound; using std::for_each; using std::transform; using std::unique_copy; using std::stable_sort;
+using std::find_if; using std::lower_bound; using std::for_each; using std::transform; using std::unique_copy; using std::stable_sort; using std::replace_if;
 using std::ostream_iterator;
 using std::placeholders::_1;
 using std::bind; using std::mem_fn; using std::ref;
@@ -554,18 +554,19 @@ string read_check_title()
 
 // Remove leading or trailing whitespace of the title passed in, and all
 // embedded consecutive whitespace characters shrunk to a single
-// character (' '). Return 0 if the tile is empty after trim, 1 if not
+// character (' ').
 void trim_title(string &title)
 {
-    transform(title.begin(), title.end(), title.begin(), [](char character){if(isspace(character))
-                                                                                return ' ';
-                                                                            else
-                                                                                return character;});
-    string trimmed_string(title.size(), ' ');
-    unique_copy(title.begin(), title.end(), trimmed_string.begin(), [](char &a, char &b) {return a == b && a == ' ';});
-    size_t beginning = trimmed_string.find_first_not_of(' ');
+    replace_if(title.begin(), title.end(), static_cast<int (*)(int)>(isspace), ' ');
+    
+    //string trimmed_string(title.size(), ' ');
+    //unique_copy(title.begin(), title.end(), trimmed_string.begin(), [](char &a, char &b) {return a == b && a == ' ';});
+    
+    
+    title.erase(unique(title.begin(), title.end(), [](char a, char b){return isspace(a) && isspace(b);}), title.end());
+    size_t beginning = title.find_first_not_of(' ');
     if (beginning != string::npos)
-        title = trimmed_string.substr(beginning, trimmed_string.find_last_not_of(' ') + 1 - beginning);
+        title = title.substr(beginning, title.find_last_not_of(' ') + 1 - beginning);
 }
 
 
@@ -653,4 +654,5 @@ void insert_new_Record(Database_t &database, Record *new_record)
     database.library_ordered_by_title.insert(new_record);
     database.library_ordered_by_id.insert(lower_bound(database.library_ordered_by_id.begin(), database.library_ordered_by_id.end(), new_record->get_ID(), compare_record_with_id), new_record);
 }
+
 
