@@ -24,8 +24,9 @@ using std::make_pair;
 using std::set; using std::list; using std::vector; using std::map; using std::unordered_set;
 using std::find_if; using std::lower_bound; using std::for_each; using std::transform; using std::unique_copy; using std::stable_sort;
 using std::ostream_iterator;
-using namespace::std::placeholders;
+using std::placeholders::_1;
 using std::bind; using std::mem_fn; using std::ref;
+using std::greater;
 
 
 // compare two records by ID
@@ -594,7 +595,7 @@ void list_ratings(Database_t &database)
     if (database.library_ordered_by_title.empty())
         cout << "Library is empty" << endl;
     else {
-        map<int, list<Record *>> library_ordered_by_rate;
+        map<int, list<Record *>, greater<int>> library_ordered_by_rate;
         for_each(database.library_ordered_by_title.begin(), database.library_ordered_by_title.end(), [&library_ordered_by_rate](Record *record_ptr){library_ordered_by_rate[record_ptr->get_rate()].push_back(record_ptr);});
         for (auto list_rating : library_ordered_by_rate)
             for_each(list_rating.second.begin(), list_rating.second.end(), print_Record_helper);

@@ -72,7 +72,7 @@ public:
         {return title < rhs.title;}
 
     friend std::ostream& operator<< (std::ostream& os, const Record& record);
-    friend std::ostream& operator<< (std::ostream& os, const Record* record);
+    //friend std::ostream& operator<< (std::ostream& os, const Record* record);
 private:
 	static int ID_counter; // must be initialized to zero.
     static int ID_counter_backup;
