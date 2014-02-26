@@ -106,6 +106,8 @@ Catalog_t::iterator find_collection_iterator(Catalog_t &catalog, string &collect
 
 Catalog_t::iterator read_check_collection_name(Catalog_t &catalog);
 
+
+void insert_new_Record(Database_t &database, Record *new_record);
 //void print_Record_helper(Record *record);
 
 int main ()
@@ -256,8 +258,9 @@ void add_Record(Database_t &database)
     }
     else {
         Record *new_record = new Record(medium, title);
-        database.library_ordered_by_title.insert(new_record);
-        database.library_ordered_by_id.insert(lower_bound(database.library_ordered_by_id.begin(), database.library_ordered_by_id.end(), new_record), new_record);
+        insert_new_Record(database, new_record);
+        //database.library_ordered_by_title.insert(new_record);
+        //database.library_ordered_by_id.insert(lower_bound(database.library_ordered_by_id.begin(), database.library_ordered_by_id.end(), new_record), new_record);
         cout << "Record " << new_record->get_ID() << " added" << endl;
     }
 }
@@ -469,9 +472,9 @@ void restore_all_data(Database_t &database)
         for (int i=0; i < num_record; i++) {
             Record *new_record = new Record(input_file);
             //insert considering duplicate with add record
-            
-            database.library_ordered_by_title.insert(new_record);
-            database.library_ordered_by_id.insert(lower_bound(database.library_ordered_by_id.begin(), database.library_ordered_by_id.end(), new_record), new_record);
+            insert_new_Record(database, new_record);
+            //database.library_ordered_by_title.insert(new_record);
+            //database.library_ordered_by_id.insert(lower_bound(database.library_ordered_by_id.begin(), database.library_ordered_by_id.end(), new_record), new_record);
         }
         int num_collection;
         if (!(input_file >> num_collection))
@@ -634,9 +637,10 @@ void modify_title(Database_t &database)
     auto library_title_iterator = probe_Record_by_title(old_record->get_title(), database.library_ordered_by_title);
     
     database.library_ordered_by_title.erase(library_title_iterator);
-    database.library_ordered_by_title.insert(new_record);
+    //database.library_ordered_by_title.insert(new_record);
     database.library_ordered_by_id.erase(library_id_iterator);
-    database.library_ordered_by_id.insert(lower_bound(database.library_ordered_by_id.begin(), database.library_ordered_by_id.end(), new_record->get_ID(), compare_record_with_id), new_record);
+    //database.library_ordered_by_id.insert(lower_bound(database.library_ordered_by_id.begin(), database.library_ordered_by_id.end(), new_record->get_ID(), compare_record_with_id), new_record);
+    insert_new_Record(database, new_record);
     
     for_each(database.catalog.begin(), database.catalog.end(), bind(&Collection::modify_title, _1, ref(old_record), ref(new_record)));
     
@@ -645,5 +649,9 @@ void modify_title(Database_t &database)
 }
 
 
-
+void insert_new_Record(Database_t &database, Record *new_record)
+{
+    database.library_ordered_by_title.insert(new_record);
+    database.library_ordered_by_id.insert(lower_bound(database.library_ordered_by_id.begin(), database.library_ordered_by_id.end(), new_record->get_ID(), compare_record_with_id), new_record);
+}
 
