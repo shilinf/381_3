@@ -5,6 +5,7 @@
 #include <iostream>
 
 using std::string;
+using std::endl;
 
 int Record::ID_counter = 0;
 int Record::ID_counter_backup = 0;
@@ -46,3 +47,12 @@ std::ostream& operator<< (std::ostream& os, const Record& record)
         os << record.ID << ": " << record.medium << " u " << record.title;
     return os;
 }
+
+/*std::ostream& operator<< (std::ostream& os, const Record *record_ptr)
+{
+    if (record_ptr->rate)
+        os << record_ptr->ID << ": " << record_ptr->medium << " " << record_ptr->rate << " " << record_ptr->title;
+    else
+        os << record_ptr->ID << ": " << record_ptr->medium << " u " << record_ptr->title;
+    return os;
+}*/

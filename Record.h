@@ -72,7 +72,7 @@ public:
         {return title < rhs.title;}
 
     friend std::ostream& operator<< (std::ostream& os, const Record& record);
-
+    friend std::ostream& operator<< (std::ostream& os, const Record* record);
 private:
 	static int ID_counter; // must be initialized to zero.
     static int ID_counter_backup;
@@ -86,5 +86,8 @@ private:
 // Output order is ID number followed by a ':' then medium, rating, title, separated by one space.
 // If the rating is zero, a 'u' is printed instead of the rating.
 std::ostream& operator<< (std::ostream& os, const Record& record);
+
+//std::ostream& operator<< (std::ostream& os, const Record* record);
+
 
 #endif

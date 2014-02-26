@@ -223,6 +223,7 @@ void print_Records(Database_t &database)
     else {
         cout << "Library contains " << database.library_ordered_by_title.size() << " records:" <<endl;
         for_each(database.library_ordered_by_title.begin(), database.library_ordered_by_title.end(), print_Record_helper);
+        //for_each(database.library_ordered_by_title.begin(), database.library_ordered_by_title.end(), ostream_iterator<Record *>(cout));
     }
 }
 
@@ -474,10 +475,7 @@ void restore_all_data(Database_t &database)
             throw Error("Invalid data found in file!");
         for (int i=0; i < num_record; i++) {
             Record *new_record = new Record(input_file);
-            //insert considering duplicate with add record
             insert_new_Record(database, new_record);
-            //database.library_ordered_by_title.insert(new_record);
-            //database.library_ordered_by_id.insert(lower_bound(database.library_ordered_by_id.begin(), database.library_ordered_by_id.end(), new_record), new_record);
         }
         int num_collection;
         if (!(input_file >> num_collection))
@@ -575,10 +573,7 @@ void find_with_string(Database_t &database)
     string key_word;
     cin >> key_word;
     bool no_record_match = true;
-    
     transform(key_word.begin(), key_word.end(), key_word.begin(), tolower);
-    
-
     for(Record *record_ptr: database.library_ordered_by_title) {
         string lower_title = record_ptr->get_title();
         transform(lower_title.begin(), lower_title.end(), lower_title.begin(), tolower);
@@ -591,16 +586,18 @@ void find_with_string(Database_t &database)
         throw Error("No records contain that string!");
 }
 
+
+
+
 void list_ratings(Database_t &database)
 {
     if (database.library_ordered_by_title.empty())
         cout << "Library is empty" << endl;
     else {
-        size_t library_size = database.library_ordered_by_title.size();
-        vector<Record *> library_ordered_by_rate(library_size);
-        copy(database.library_ordered_by_title.begin(), database.library_ordered_by_title.end(),library_ordered_by_rate.begin());
-        stable_sort(library_ordered_by_rate.begin(), library_ordered_by_rate.end(), [](Record* r1, Record *r2){return r1->get_rate() > r2->get_rate();});
-        for_each(library_ordered_by_rate.begin(), library_ordered_by_rate.end(), print_Record_helper);
+        map<int, list<Record *>> library_ordered_by_rate;
+        for_each(database.library_ordered_by_title.begin(), database.library_ordered_by_title.end(), [&library_ordered_by_rate](Record *record_ptr){library_ordered_by_rate[record_ptr->get_rate()].push_back(record_ptr);});
+        for (auto list_rating : library_ordered_by_rate)
+            for_each(list_rating.second.begin(), list_rating.second.end(), print_Record_helper);
     }
 }
 
@@ -641,13 +638,10 @@ void modify_title(Database_t &database)
     auto library_title_iterator = probe_Record_by_title(old_record->get_title(), database.library_ordered_by_title);
     
     database.library_ordered_by_title.erase(library_title_iterator);
-    //database.library_ordered_by_title.insert(new_record);
     database.library_ordered_by_id.erase(library_id_iterator);
-    //database.library_ordered_by_id.insert(lower_bound(database.library_ordered_by_id.begin(), database.library_ordered_by_id.end(), new_record->get_ID(), compare_record_with_id), new_record);
     insert_new_Record(database, new_record);
     
     for_each(database.catalog.begin(), database.catalog.end(), bind(&Collection::modify_title, _1, ref(old_record), ref(new_record)));
-    
     cout <<"Title for record "<<old_record->get_ID()<< " changed to " << new_title <<endl;
     delete old_record;
 }
