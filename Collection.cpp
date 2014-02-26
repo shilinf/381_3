@@ -75,9 +75,6 @@ void Collection::modify_title(Record *old_record, Record *new_record)
 void Collection::save(std::ostream& os) const
 {
     os << name << " " << members.size() << endl;
-    //for (auto record_ptr : members)
-    //    os << record_ptr->get_title() << endl;
-    
     for_each(members.begin(), members.end(), [&os](Record *record_ptr){os << record_ptr->get_title() << endl;});
 }
 

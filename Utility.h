@@ -22,6 +22,20 @@ struct Title_exception {
 	const char* msg;
 };
 
+// Compare two objects (passed by const&) using T's operator<
+template<typename T>
+struct Less_than_ref {
+	bool operator() (const T& t1, const T& t2) const {return t1 < t2;}
+};
+
+// Compare two pointers (T is a pointer type) using *T's operator<
+template<typename T>
+struct Less_than_ptr {
+	bool operator()(const T p1, const T p2) const {return *p1 < *p2;}
+};
+
+//void print_Record_helper(Record *record, std::ostream& os = std::cout);
+void print_Record_helper(Record *record);
 
 class Collection_Statist {
 public:
@@ -40,7 +54,7 @@ public:
     {return total_records_in_collection;}
     long get_num_frequent_records() const
     {
-        return std::count_if(records_appeared.begin(), records_appeared.end(), [](std::pair<int, int> id_count){return id_count.second > 1;});
+        return std::count_if(records_appeared.begin(), records_appeared.end(), [](const std::pair<int, int> &id_count){return id_count.second > 1;});
     }
     size_t get_num_records_in_collection() const
     {return records_appeared.size();}
@@ -48,20 +62,5 @@ private:
     int total_records_in_collection;
     std::map<int, int> records_appeared;
 };
-
-// Compare two objects (passed by const&) using T's operator<
-template<typename T>
-struct Less_than_ref {
-	bool operator() (const T& t1, const T& t2) const {return t1 < t2;}
-};
-
-// Compare two pointers (T is a pointer type) using *T's operator<
-template<typename T>
-struct Less_than_ptr {
-	bool operator()(const T p1, const T p2) const {return *p1 < *p2;}
-};
-
-//void print_Record_helper(Record *record, std::ostream& os = std::cout);
-void print_Record_helper(Record *record);
 
 #endif
