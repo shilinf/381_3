@@ -12,6 +12,7 @@ using std::set;
 using std::for_each; using std::copy; using std::set_union;
 using std::inserter;
 using std::ref;
+using std::placeholders::_1;
 
 
 Collection::Collection(std::ifstream& is, const set<Record*, Compare_Record_ptr_title>& library)
@@ -85,8 +86,7 @@ std::ostream& operator<< (std::ostream& os, const Collection& collection)
         os << " None" << endl;
     else {
         os << endl;
-        
-        for_each(collection.members.begin(), collection.members.end(), [&os](Record *record_ptr){os << *record_ptr << endl;});
+        for_each(collection.members.begin(), collection.members.end(), bind(&Record::print, _1, ref(os)));
     }
     return os;
 }
