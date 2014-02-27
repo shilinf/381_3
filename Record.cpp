@@ -39,17 +39,17 @@ void Record::save(std::ostream& os) const
     os << ID << " " << medium << " " << rate << " " << title << std::endl;
 }
 
-void Record::print(std::ostream& os) const
-{
-    os << *this;
-    os << endl;
-}
-
 std::ostream& operator<< (std::ostream& os, const Record& record)
 {
     if (record.rate)
         os << record.ID << ": " << record.medium << " " << record.rate << " " << record.title;
     else
         os << record.ID << ": " << record.medium << " u " << record.title;
+    return os;
+}
+
+std::ostream& operator<< (std::ostream& os, const Record* record_ptr)
+{
+    os << *record_ptr << endl;
     return os;
 }

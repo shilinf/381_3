@@ -10,7 +10,6 @@
 #include <set>
 #include <list>
 #include <vector>
-#include <unordered_set>
 #include <algorithm>
 #include <iterator>
 #include <functional>
@@ -21,11 +20,11 @@ using std::cin; using std::cout; using std::endl;
 using std::ifstream; using std::ofstream;
 using std::isspace;
 using std::make_pair;
-using std::set; using std::list; using std::vector; using std::map; using std::unordered_set;
-using std::find_if; using std::lower_bound; using std::for_each; using std::transform; using std::unique_copy; using std::stable_sort; using std::replace_if;
+using std::set; using std::list; using std::vector; using std::map;
+using std::find_if; using std::lower_bound; using std::for_each;
+using std::transform; using std::replace_if;
 using std::ostream_iterator;
-using std::placeholders::_1;
-using std::bind; using std::mem_fn; using std::ref;
+using std::bind; using std::mem_fn; using std::ref; using std::placeholders::_1;
 using std::greater;
 
 using Ordered_by_title_lib_t = set<Record *, Compare_Record_ptr_title>;
@@ -40,6 +39,12 @@ struct Database_t {
 
 using Command_fp_t = void (*)(Database_t&);
 using Command_map_t = map<string, Command_fp_t>;
+
+struct Title_exception {
+	Title_exception(const char* msg_) : msg(msg_)
+    {}
+	const char* msg;
+};
 
 // functions to handle command
 void find_Record_match_title(Database_t &database);
@@ -72,17 +77,22 @@ void load_command_map(Command_map_t& commands_map);
 Ordered_by_title_lib_t::iterator read_title_probe_Record(Ordered_by_title_lib_t &library);
 string read_check_title();
 void trim_title(string &title);
-Ordered_by_title_lib_t::iterator probe_Record_by_title(string title, Ordered_by_title_lib_t &library);
+Ordered_by_title_lib_t::iterator probe_Record_by_title(string title,
+                                                       Ordered_by_title_lib_t &library);
 string read_check_new_title_name(Ordered_by_title_lib_t &library);
 Ordered_by_id_lib_t::iterator read_ID_probe_Record(Ordered_by_id_lib_t &library);
 int read_and_check_integer();
-Ordered_by_id_lib_t::iterator probe_Record_by_id(int id, Ordered_by_id_lib_t &library);
+Ordered_by_id_lib_t::iterator probe_Record_by_id(int id,
+                                                 Ordered_by_id_lib_t &library);
 Catalog_t::iterator read_check_collection_name(Catalog_t &catalog);
-Catalog_t::iterator find_collection_iterator(Catalog_t &catalog, string &collection_name);
-Catalog_t::iterator read_check_new_collection_name(Catalog_t &catalog, string &new_collection_name);
+Catalog_t::iterator find_collection_iterator(Catalog_t &catalog,
+                                             string &collection_name);
+Catalog_t::iterator read_check_new_collection_name(Catalog_t &catalog,
+                                                   string &new_collection_name);
 void clear_Library_helper(Database_t &database);
 void free_all_records(Ordered_by_title_lib_t &library);
 void clear_all_data_helper(Database_t &database);
+int read_int_from_file(ifstream &is);
 void insert_new_Record(Database_t &database, Record *new_record);
 bool compare_record_with_id(Record *record_ptr, int id);
 void discard_input_remainder(void);
@@ -158,22 +168,24 @@ void load_command_map(Command_map_t& commands_map)
 // find and print the specified record with the matching title
 void find_Record_match_title(Database_t &database)
 {
-    auto library_iterator = read_title_probe_Record(database.library_ordered_by_title);
-    (*library_iterator)->print(cout);
+    auto library_iterator =
+    read_title_probe_Record(database.library_ordered_by_title);
+    cout << *library_iterator;
 }
 
 // print the specified record with the matching ID number
 void print_Record_match_id(Database_t &database)
 {
     auto library_iterator = read_ID_probe_Record(database.library_ordered_by_id);
-    (*library_iterator)->print(cout);
+    cout << *library_iterator;
 }
 
 // print collection - print each record in the collection with the
 // specified name
 void print_Collection_match_name(Database_t &database)
 {
-    Catalog_t::iterator catalog_iterator = read_check_collection_name(database.catalog);
+    Catalog_t::iterator catalog_iterator =
+    read_check_collection_name(database.catalog);
     cout << *catalog_iterator;
 }
 
@@ -184,7 +196,7 @@ void print_Records(Database_t &database)
         cout << "Library is empty" << endl;
     else {
         cout << "Library contains " << database.library_ordered_by_title.size() << " records:" <<endl;
-        for_each(database.library_ordered_by_title.begin(), database.library_ordered_by_title.end(), bind(&Record::print, _1, ref(cout)));
+        copy(database.library_ordered_by_title.begin(), database.library_ordered_by_title.end(), ostream_iterator<const Record *>(cout));
     }
 }
 
@@ -248,7 +260,6 @@ void modify_Record_rating(Database_t &database)
 // delete the specified record from the Library
 void delete_Record_from_Library(Database_t &database)
 {
-
     auto library_title_iterator = read_title_probe_Record(database.library_ordered_by_title);
     if (find_if(database.catalog.begin(), database.catalog.end(), bind(&Collection::is_member_present, _1, *library_title_iterator)) != database.catalog.end())
         throw Title_exception("Cannot delete a record that is a member of a collection!");
@@ -350,19 +361,15 @@ void restore_all_data(Database_t &database)
     Record::save_ID_counter();
     Record::reset_ID_counter();
     try {
-        int num_record;
-        if (!(input_file >> num_record))
-            throw Error("Invalid data found in file!");
+        int num_record = read_int_from_file(input_file);
         for (int i=0; i < num_record; i++) {
             Record *new_record = new Record(input_file);
             insert_new_Record(database, new_record);
         }
-        int num_collection;
-        if (!(input_file >> num_collection))
-            throw Error("Invalid data found in file!");
+        int num_collection = read_int_from_file(input_file);
         for (int i = 0; i < num_collection; i++) {
             Collection new_collection(input_file, database.library_ordered_by_title);
-            database.catalog.push_back(new_collection);
+            database.catalog.insert(lower_bound(database.catalog.begin(), database.catalog.end(), new_collection), new_collection);
         }
         input_file.close();
         free_all_records(local_library_ordered_by_title);
@@ -378,6 +385,14 @@ void restore_all_data(Database_t &database)
     }
 }
 
+int read_int_from_file(ifstream &is)
+{
+    int input_int;
+    if (!(is >> input_int))
+        throw Error("Invalid data found in file!");
+    return input_int;
+}
+
 // clear all data (as in cA), and also destroy the Library and Catalog
 // containers themselves, so that all memory is deallocated, and then terminate
 void quit(Database_t &database)
@@ -387,6 +402,7 @@ void quit(Database_t &database)
     cout << "Done" << endl;
 }
 
+// function object class for command find_with_string
 class Find_string {
 public:
     Find_string() : find_status(false) {}
@@ -396,7 +412,7 @@ public:
         transform(lower_title.begin(), lower_title.end(), lower_title.begin(), tolower);
         if (lower_title.find(key_word) != string::npos) {
             find_status = true;
-            record_ptr->print(cout);
+            cout << record_ptr;
         }
     }
     bool get_find_status()
@@ -427,8 +443,8 @@ void list_ratings(Database_t &database)
                  [&library_ordered_by_rate](Record *record_ptr)
         {library_ordered_by_rate[record_ptr->get_rate()].push_back(record_ptr);});
         for (auto list_rating : library_ordered_by_rate)
-            for_each(list_rating.second.begin(), list_rating.second.end(),
-                     bind(&Record::print, _1, ref(cout)));
+            copy(list_rating.second.begin(), list_rating.second.end(),
+                     ostream_iterator<const Record *>(cout));
     }
 }
 
@@ -469,6 +485,7 @@ void modify_title(Database_t &database)
     delete old_record;
 }
 
+// read title and probe the title in library
 Ordered_by_title_lib_t::iterator read_title_probe_Record(Ordered_by_title_lib_t &library)
 {
     string title = read_check_title();
@@ -478,6 +495,7 @@ Ordered_by_title_lib_t::iterator read_title_probe_Record(Ordered_by_title_lib_t 
     return library_iterator;
 }
 
+// read new title name and check whether the name has already exist.
 string read_check_new_title_name(Ordered_by_title_lib_t &library)
 {
     string title = read_check_title();

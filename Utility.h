@@ -14,12 +14,6 @@ struct Error {
 	const char* msg;
 };
 
-struct Title_exception {
-	Title_exception(const char* msg_) : msg(msg_)
-    {}
-	const char* msg;
-};
-
 // compare two records by title
 struct Compare_Record_ptr_title {
     bool operator() (const Record* p1, const Record* p2) const

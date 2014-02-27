@@ -5,12 +5,11 @@
 #include <algorithm>
 #include <iterator>
 
-
-using std::endl;
 using std::string;
+using std::endl;
 using std::set;
-using std::for_each; using std::copy; using std::set_union;
-using std::inserter;
+using std::for_each; using std::set_union;
+using std::inserter; using std::ostream_iterator;
 using std::ref;
 using std::placeholders::_1;
 
@@ -86,11 +85,7 @@ std::ostream& operator<< (std::ostream& os, const Collection& collection)
         os << " None" << endl;
     else {
         os << endl;
-        for_each(collection.members.begin(), collection.members.end(), bind(&Record::print, _1, ref(os)));
+        copy(collection.members.begin(), collection.members.end(), ostream_iterator<const Record *>(os));
     }
     return os;
 }
-
-
-
-
