@@ -74,11 +74,12 @@ void modify_title(Database_t &database);
 
 // helper functions
 void load_command_map(Command_map_t& commands_map);
-Ordered_by_title_lib_t::iterator read_title_probe_Record(Ordered_by_title_lib_t &library);
+Ordered_by_title_lib_t::iterator read_title_probe_Record(Ordered_by_title_lib_t
+                                                         &library);
 string read_check_title();
 void trim_title(string &title);
 Ordered_by_title_lib_t::iterator probe_Record_by_title(string title,
-                                                       Ordered_by_title_lib_t &library);
+                                            Ordered_by_title_lib_t &library);
 string read_check_new_title_name(Ordered_by_title_lib_t &library);
 Ordered_by_id_lib_t::iterator read_ID_probe_Record(Ordered_by_id_lib_t &library);
 int read_and_check_integer();
@@ -195,8 +196,11 @@ void print_Records(Database_t &database)
     if (database.library_ordered_by_title.empty())
         cout << "Library is empty" << endl;
     else {
-        cout << "Library contains " << database.library_ordered_by_title.size() << " records:" <<endl;
-        copy(database.library_ordered_by_title.begin(), database.library_ordered_by_title.end(), ostream_iterator<const Record *>(cout));
+        cout << "Library contains " << database.library_ordered_by_title.size()
+        << " records:" <<endl;
+        copy(database.library_ordered_by_title.begin(),
+             database.library_ordered_by_title.end(),
+             ostream_iterator<const Record *>(cout));
     }
 }
 
@@ -206,8 +210,10 @@ void print_Catalog(Database_t &database)
     if (database.catalog.empty())
         cout << "Catalog is empty" <<endl;
     else {
-        cout << "Catalog contains " << database.catalog.size() << " collections:" <<endl;
-        copy(database.catalog.begin(), database.catalog.end(), ostream_iterator<Collection &>(cout));
+        cout << "Catalog contains " << database.catalog.size()
+        << " collections:" <<endl;
+        copy(database.catalog.begin(), database.catalog.end(),
+             ostream_iterator<Collection &>(cout));
     }
 }
 
@@ -234,7 +240,8 @@ void add_Record(Database_t &database)
 void add_Collection(Database_t &database)
 {
     string new_collection_name;
-    auto insert_position = read_check_new_collection_name(database.catalog, new_collection_name);
+    auto insert_position = read_check_new_collection_name(database.catalog,
+                                                          new_collection_name);
     database.catalog.insert(insert_position, Collection(new_collection_name));
     cout << "Collection " << new_collection_name << " added" <<endl;
 }
@@ -242,39 +249,49 @@ void add_Collection(Database_t &database)
 // add a record to a specified collection
 void add_Record_to_Collection(Database_t &database)
 {
-    Catalog_t::iterator catalog_iterator = read_check_collection_name(database.catalog);
-    Ordered_by_id_lib_t::iterator library_iterator = read_ID_probe_Record(database.library_ordered_by_id);
+    Catalog_t::iterator catalog_iterator =
+            read_check_collection_name(database.catalog);
+    Ordered_by_id_lib_t::iterator library_iterator =
+            read_ID_probe_Record(database.library_ordered_by_id);
     catalog_iterator->add_member(*library_iterator);
-    cout << "Member " << (*library_iterator)->get_ID() << " " << (*library_iterator)->get_title() <<" added" << endl;
+    cout << "Member " << (*library_iterator)->get_ID() << " "
+        << (*library_iterator)->get_title() <<" added" << endl;
 }
 
 // modify the rating of the specified record with the matching ID number
 void modify_Record_rating(Database_t &database)
 {
-    Ordered_by_id_lib_t::iterator library_iterator = read_ID_probe_Record(database.library_ordered_by_id);
+    Ordered_by_id_lib_t::iterator library_iterator =
+            read_ID_probe_Record(database.library_ordered_by_id);
     int rating_input = read_and_check_integer();
     (*library_iterator)->set_rating(rating_input);
-    cout << "Rating for record " << (*library_iterator)->get_ID() << " changed to " << rating_input << endl;
+    cout << "Rating for record " << (*library_iterator)->get_ID()
+        << " changed to " << rating_input << endl;
 }
 
 // delete the specified record from the Library
 void delete_Record_from_Library(Database_t &database)
 {
-    auto library_title_iterator = read_title_probe_Record(database.library_ordered_by_title);
-    if (find_if(database.catalog.begin(), database.catalog.end(), bind(&Collection::is_member_present, _1, *library_title_iterator)) != database.catalog.end())
+    auto library_title_iterator =
+        read_title_probe_Record(database.library_ordered_by_title);
+    if (find_if(database.catalog.begin(), database.catalog.end(),
+                bind(&Collection::is_member_present, _1,
+                     *library_title_iterator)) != database.catalog.end())
         throw Title_exception("Cannot delete a record that is a member of a collection!");
     int record_ID = (*library_title_iterator)->get_ID();
     Record *record_ptr = * library_title_iterator;
     database.library_ordered_by_title.erase(library_title_iterator);
-    database.library_ordered_by_id.erase(probe_Record_by_id(record_ID, database.library_ordered_by_id));
-    cout << "Record " << record_ID << " " << record_ptr->get_title() << " deleted" << endl;
+    database.library_ordered_by_id.erase(probe_Record_by_id(record_ID,
+                                            database.library_ordered_by_id));
+    cout << "Record " << record_ID << " " << record_ptr->get_title()
+        << " deleted" << endl;
     delete record_ptr;
 }
 
 // delete the specified collection from the Catalog
 void delete_Collection_from_Catalog(Database_t &database)
 {
-    Catalog_t::iterator catalog_iterator = read_check_collection_name(database.catalog);
+    auto catalog_iterator = read_check_collection_name(database.catalog);
     string collection_name = catalog_iterator->get_name();
     database.catalog.erase(catalog_iterator);
     cout << "Collection " << collection_name << " deleted" << endl;
@@ -283,10 +300,11 @@ void delete_Collection_from_Catalog(Database_t &database)
 // delete the specified record as member of the a specified collection
 void delete_Record_from_Collection(Database_t &database)
 {
-    Catalog_t::iterator catalog_iterator = read_check_collection_name(database.catalog);
-    Ordered_by_id_lib_t::iterator library_iterator = read_ID_probe_Record(database.library_ordered_by_id);
+    auto catalog_iterator = read_check_collection_name(database.catalog);
+    auto library_iterator = read_ID_probe_Record(database.library_ordered_by_id);
     catalog_iterator->remove_member(*library_iterator);
-    cout << "Member " << (*library_iterator)->get_ID() << " " << (*library_iterator)->get_title() << " deleted" << endl;
+    cout << "Member " << (*library_iterator)->get_ID() << " "
+        << (*library_iterator)->get_title() << " deleted" << endl;
 }
 
 // Clear the Library. If collections are not empty, throw exception
@@ -297,7 +315,8 @@ void clear_Library(Database_t &database)
 }
 void clear_Library_helper(Database_t &database)
 {
-    if (find_if_not(database.catalog.begin(), database.catalog.end(), mem_fn(&Collection::empty)) != database.catalog.end())
+    if (find_if_not(database.catalog.begin(), database.catalog.end(),
+                    mem_fn(&Collection::empty)) != database.catalog.end())
         throw Error("Cannot clear all records unless all collections are empty!");
     void free_all_records(Ordered_by_title_lib_t &library);
     database.library_ordered_by_title.clear();
@@ -336,9 +355,12 @@ void save_all_data(Database_t &database)
     if (!output_file.is_open())
         throw Error("Could not open file!");
     output_file << database.library_ordered_by_title.size() << endl;
-    for_each(database.library_ordered_by_title.begin(), database.library_ordered_by_title.end(), bind(&Record::save, _1, ref(output_file)));
+    for_each(database.library_ordered_by_title.begin(),
+             database.library_ordered_by_title.end(),
+             bind(&Record::save, _1, ref(output_file)));
     output_file << database.catalog.size() << endl;
-    for_each(database.catalog.begin(), database.catalog.end(), bind(&Collection::save, _1, ref(output_file)));
+    for_each(database.catalog.begin(), database.catalog.end(),
+             bind(&Collection::save, _1, ref(output_file)));
     output_file.close();
     cout << "Data saved" <<endl;
 }
@@ -352,9 +374,9 @@ void restore_all_data(Database_t &database)
     ifstream input_file(file_name.c_str());
     if (!input_file.is_open())
         throw Error("Could not open file!");
-    Catalog_t local_catalog(database.catalog);
-    Ordered_by_title_lib_t local_library_ordered_by_title(database.library_ordered_by_title);
-    Ordered_by_id_lib_t local_library_ordered_by_id(database.library_ordered_by_id);
+    auto local_catalog(database.catalog);
+    auto local_library_ordered_by_title(database.library_ordered_by_title);
+    auto local_library_ordered_by_id(database.library_ordered_by_id);
     database.catalog.clear();
     database.library_ordered_by_id.clear();
     database.library_ordered_by_title.clear();
@@ -368,8 +390,11 @@ void restore_all_data(Database_t &database)
         }
         int num_collection = read_int_from_file(input_file);
         for (int i = 0; i < num_collection; i++) {
-            Collection new_collection(input_file, database.library_ordered_by_title);
-            database.catalog.insert(lower_bound(database.catalog.begin(), database.catalog.end(), new_collection), new_collection);
+            Collection new_collection(input_file,
+                                      database.library_ordered_by_title);
+            database.catalog.insert(lower_bound(database.catalog.begin(),
+                                                database.catalog.end(),
+                                                new_collection), new_collection);
         }
         input_file.close();
         free_all_records(local_library_ordered_by_title);
@@ -409,7 +434,8 @@ public:
     void operator() (Record *record_ptr, string key_word)
     {
         string lower_title = record_ptr->get_title();
-        transform(lower_title.begin(), lower_title.end(), lower_title.begin(), tolower);
+        transform(lower_title.begin(), lower_title.end(), lower_title.begin(),
+                  tolower);
         if (lower_title.find(key_word) != string::npos) {
             find_status = true;
             cout << record_ptr;
@@ -427,7 +453,9 @@ void find_with_string(Database_t &database)
     cin >> key_word;
     transform(key_word.begin(), key_word.end(), key_word.begin(), tolower);
     Find_string find_str;
-    for_each(database.library_ordered_by_title.begin(), database.library_ordered_by_title.end(), bind(ref(find_str), _1, ref(key_word)));
+    for_each(database.library_ordered_by_title.begin(),
+             database.library_ordered_by_title.end(),
+             bind(ref(find_str), _1, ref(key_word)));
     if (!find_str.get_find_status())
         throw Error("No records contain that string!");
 }
@@ -451,11 +479,15 @@ void list_ratings(Database_t &database)
 void collection_statistics(Database_t &database)
 {
     Collection_Statist statist;
-    for_each(database.catalog.begin(), database.catalog.end(), bind(&Collection::get_collection_statist, _1, ref(statist)));
+    for_each(database.catalog.begin(), database.catalog.end(),
+             bind(&Collection::get_collection_statist, _1, ref(statist)));
     size_t library_size = database.library_ordered_by_title.size();
-    cout << statist.get_num_records_in_collection() <<" out of "<< library_size <<" Records appear in at least one Collection" << endl;
-    cout << statist.get_num_frequent_records() <<" out of " << library_size <<" Records appear in more than one Collection" << endl;
-    cout << "Collections contain a total of "<< statist.get_total_occurance() <<" Records" << endl;
+    cout << statist.get_num_records_in_collection() <<" out of "<< library_size
+        <<" Records appear in at least one Collection" << endl;
+    cout << statist.get_num_frequent_records() <<" out of " << library_size
+        <<" Records appear in more than one Collection" << endl;
+    cout << "Collections contain a total of "<< statist.get_total_occurance()
+        <<" Records" << endl;
 }
 
 void combine_collections(Database_t &database)
@@ -467,7 +499,8 @@ void combine_collections(Database_t &database)
     string new_collection_name;
     auto insert_position = read_check_new_collection_name(database.catalog, new_collection_name);
     database.catalog.insert(insert_position, Collection(*catalog_iterator1, *catalog_iterator2, new_collection_name));
-    cout << "Collections "<< collection1_name<<" and "<< collection2_name <<" combined into new collection "<< new_collection_name << endl;
+    cout << "Collections "<< collection1_name<<" and "<< collection2_name
+        <<" combined into new collection "<< new_collection_name << endl;
 }
 
 void modify_title(Database_t &database)
@@ -476,17 +509,22 @@ void modify_title(Database_t &database)
     string new_title = read_check_new_title_name(database.library_ordered_by_title);
     Record *old_record = *library_id_iterator;
     Record *new_record = new Record(*old_record, new_title);
-    auto library_title_iterator = probe_Record_by_title(old_record->get_title(), database.library_ordered_by_title);
+    auto library_title_iterator = probe_Record_by_title(old_record->get_title(),
+                                            database.library_ordered_by_title);
     database.library_ordered_by_title.erase(library_title_iterator);
     database.library_ordered_by_id.erase(library_id_iterator);
     insert_new_Record(database, new_record);
-    for_each(database.catalog.begin(), database.catalog.end(), bind(&Collection::modify_member_title, _1, ref(old_record), ref(new_record)));
-    cout <<"Title for record "<<old_record->get_ID()<< " changed to " << new_title <<endl;
+    for_each(database.catalog.begin(), database.catalog.end(),
+             bind(&Collection::modify_member_title, _1,
+                  ref(old_record), ref(new_record)));
+    cout <<"Title for record "<<old_record->get_ID()<< " changed to "
+        << new_title <<endl;
     delete old_record;
 }
 
 // read title and probe the title in library
-Ordered_by_title_lib_t::iterator read_title_probe_Record(Ordered_by_title_lib_t &library)
+Ordered_by_title_lib_t::iterator read_title_probe_Record(Ordered_by_title_lib_t
+                                                         &library)
 {
     string title = read_check_title();
     auto library_iterator = probe_Record_by_title(title, library);
@@ -521,16 +559,20 @@ string read_check_title()
 // character (' ').
 void trim_title(string &title)
 {
-    title.erase(unique(title.begin(), title.end(), [](char a, char b){return isspace(a) && isspace(b);}), title.end());
-    replace_if(title.begin(), title.end(), static_cast<int (*)(int)>(isspace), ' ');
+    title.erase(unique(title.begin(), title.end(), [](char a, char b)
+                       {return isspace(a) && isspace(b);}), title.end());
+    replace_if(title.begin(), title.end(),
+               static_cast<int (*)(int)>(isspace), ' ');
     size_t beginning = title.find_first_not_of(' ');
     if (beginning != string::npos)
-        title = title.substr(beginning, title.find_last_not_of(' ') + 1 - beginning);
+        title = title.substr(beginning,
+                             title.find_last_not_of(' ') + 1 - beginning);
     else
         title = "";
 }
 
-Ordered_by_title_lib_t::iterator probe_Record_by_title(string title, Ordered_by_title_lib_t &library)
+Ordered_by_title_lib_t::iterator probe_Record_by_title(string title,
+                                            Ordered_by_title_lib_t &library)
 {
     Record probe(title);
     return library.find(&probe);
@@ -553,10 +595,12 @@ int read_and_check_integer()
 }
 
 // probe the library to find the iterator according to the input id
-Ordered_by_id_lib_t::iterator probe_Record_by_id(int id, Ordered_by_id_lib_t &library)
+Ordered_by_id_lib_t::iterator probe_Record_by_id(int id,
+                                                 Ordered_by_id_lib_t &library)
 {
-    auto library_iterator = lower_bound(library.begin(), library.end(), id, compare_record_with_id);
-    if (library_iterator != library.end() && (*library_iterator)->get_ID() == id)
+    auto library_iterator = lower_bound(library.begin(), library.end(), id,
+                                        compare_record_with_id);
+    if (library_iterator != library.end() && (*library_iterator)->get_ID() ==id)
         return library_iterator;
     else
         throw Error("No record with that ID!");
@@ -566,22 +610,27 @@ Catalog_t::iterator read_check_collection_name(Catalog_t &catalog)
 {
     string collection_name;
     auto catalog_iterator = find_collection_iterator(catalog, collection_name);
-    if (catalog_iterator != catalog.end() && catalog_iterator->get_name() == collection_name)
+    if (catalog_iterator != catalog.end() && catalog_iterator->get_name() ==
+        collection_name)
         return catalog_iterator;
     else
         throw Error("No collection with that name!");
 }
 
 // Read new collection. Throw exception if collection already exists.
-Catalog_t::iterator read_check_new_collection_name(Catalog_t &catalog, string &new_collection_name)
+Catalog_t::iterator read_check_new_collection_name(Catalog_t &catalog,
+                                                   string &new_collection_name)
 {
-    auto catalog_iterator = find_collection_iterator(catalog, new_collection_name);
-    if (catalog_iterator != catalog.end() && catalog_iterator->get_name() == new_collection_name)
+    auto catalog_iterator = find_collection_iterator(catalog,
+                                                     new_collection_name);
+    if (catalog_iterator != catalog.end() && catalog_iterator->get_name() ==
+        new_collection_name)
         throw Error("Catalog already has a collection with this name!");
     return catalog_iterator;
 }
 
-Catalog_t::iterator find_collection_iterator(Catalog_t &catalog, string &collection_name)
+Catalog_t::iterator find_collection_iterator(Catalog_t &catalog,
+                                             string &collection_name)
 {
     cin >> collection_name;
     Collection probe(collection_name);
@@ -591,13 +640,17 @@ Catalog_t::iterator find_collection_iterator(Catalog_t &catalog, string &collect
 
 void free_all_records(Ordered_by_title_lib_t &library)
 {
-    for_each(library.begin(), library.end(), [](Record *record_ptr){free(record_ptr);});
+    for_each(library.begin(), library.end(), [](Record *record_ptr)
+                                                    {free(record_ptr);});
 }
 
 void insert_new_Record(Database_t &database, Record *new_record)
 {
     database.library_ordered_by_title.insert(new_record);
-    database.library_ordered_by_id.insert(lower_bound(database.library_ordered_by_id.begin(), database.library_ordered_by_id.end(), new_record->get_ID(), compare_record_with_id), new_record);
+    database.library_ordered_by_id.insert(
+        lower_bound(database.library_ordered_by_id.begin(),
+                    database.library_ordered_by_id.end(),
+                    new_record->get_ID(), compare_record_with_id), new_record);
 }
 
 bool compare_record_with_id(Record *record_ptr, int id)

@@ -45,8 +45,10 @@ public:
 	void clear()
         {members.clear();}
     
+    // Modify title by removing old_record and add new_record.
     void modify_member_title(Record *old_record, Record *new_record);
     
+    // Provide collection statist
     void get_collection_statist(Collection_Statist &statist) const;
 
 	// Write a Collections's data to a stream in save format, with endl as specified.

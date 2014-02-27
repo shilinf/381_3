@@ -8,13 +8,14 @@
 using std::string;
 using std::endl;
 using std::set;
-using std::for_each; using std::set_union;
+using std::for_each; using std::set_union; using std::copy;
 using std::inserter; using std::ostream_iterator;
 using std::ref;
 using std::placeholders::_1;
 
 
-Collection::Collection(std::ifstream& is, const set<Record*, Compare_Record_ptr_title>& library)
+Collection::Collection(std::ifstream& is, const set<Record*,
+                       Compare_Record_ptr_title>& library)
 {
     int num_records;
     if (!(is >> name >> num_records))
@@ -31,9 +32,11 @@ Collection::Collection(std::ifstream& is, const set<Record*, Compare_Record_ptr_
     }
 }
 
-Collection::Collection(const Collection& c1, const Collection& c2, const std::string& name_): name(name_)
+Collection::Collection(const Collection& c1, const Collection& c2,
+                       const std::string& name_): name(name_)
 {
-    set_union(c1.members.begin(), c1.members.end(), c2.members.begin(), c2.members.end(), inserter(members, members.begin()));
+    set_union(c1.members.begin(), c1.members.end(), c2.members.begin(),
+              c2.members.end(), inserter(members, members.begin()));
 }
 
 
@@ -75,7 +78,8 @@ void Collection::get_collection_statist(Collection_Statist &statist) const
 void Collection::save(std::ostream& os) const
 {
     os << name << " " << members.size() << endl;
-    for_each(members.begin(), members.end(), [&os](Record *record_ptr){os << record_ptr->get_title() << endl;});
+    for_each(members.begin(), members.end(), [&os](Record *record_ptr)
+    {os << record_ptr->get_title() << endl;});
 }
 
 std::ostream& operator<< (std::ostream& os, const Collection& collection)
@@ -85,7 +89,8 @@ std::ostream& operator<< (std::ostream& os, const Collection& collection)
         os << " None" << endl;
     else {
         os << endl;
-        copy(collection.members.begin(), collection.members.end(), ostream_iterator<const Record *>(os));
+        copy(collection.members.begin(), collection.members.end(),
+             ostream_iterator<const Record *>(os));
     }
     return os;
 }

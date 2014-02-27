@@ -27,7 +27,8 @@ public:
     {
         ++total_records_in_collection;
         int record_id = record_ptr->get_ID();
-        std::map<int, int>::iterator find_iterator = records_appeared.find(record_id);
+        std::map<int, int>::iterator find_iterator =
+                records_appeared.find(record_id);
         if (find_iterator == records_appeared.end())
             records_appeared.insert(std::make_pair(record_id, 1));
         else
@@ -37,7 +38,9 @@ public:
     {return total_records_in_collection;}
     long get_num_frequent_records() const
     {
-        return std::count_if(records_appeared.begin(), records_appeared.end(), [](const std::pair<int, int> &id_count){return id_count.second > 1;});
+        return std::count_if(records_appeared.begin(), records_appeared.end(),
+                             [](const std::pair<int, int> &id_count)
+                                    {return id_count.second > 1;});
     }
     size_t get_num_records_in_collection() const
     {return records_appeared.size();}
