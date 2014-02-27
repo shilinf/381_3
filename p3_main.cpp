@@ -137,9 +137,9 @@ int main ()
                 if (cfp)
                     cfp(database);
                 else {
+                    commands_map.erase(command);
                     cout << "Unrecognized command!" << endl;
                     discard_input_remainder();
-                    commands_map.erase(command);
                 }
             }
         } catch (Error& error) {
@@ -599,7 +599,7 @@ void find_with_string(Database_t &database)
     cin >> key_word;
     transform(key_word.begin(), key_word.end(), key_word.begin(), tolower);
     Find_string find_str;
-    for_each(database.library_ordered_by_title.begin(), database.library_ordered_by_title.end(), bind(find_str, _1, ref(key_word)));
+    for_each(database.library_ordered_by_title.begin(), database.library_ordered_by_title.end(), bind(ref(find_str), _1, ref(key_word)));
     if (!find_str.get_find_status())
         throw Error("No records contain that string!");
 }
