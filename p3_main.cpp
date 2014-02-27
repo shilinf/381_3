@@ -582,6 +582,7 @@ Ordered_by_title_lib_t::iterator probe_Record_by_title(string title,
     return library.find(&probe);
 }
 
+// Read ID and probe the record.
 Ordered_by_id_lib_t::iterator read_ID_probe_Record(Ordered_by_id_lib_t &library)
 {
     int id = read_and_check_integer();
@@ -610,6 +611,7 @@ Ordered_by_id_lib_t::iterator probe_Record_by_id(int id,
         throw Error("No record with that ID!");
 }
 
+// read collection name and check whether collection exists
 Catalog_t::iterator read_check_collection_name(Catalog_t &catalog)
 {
     string collection_name;
