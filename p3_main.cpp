@@ -45,6 +45,9 @@ struct Database_t {
     Ordered_by_id_lib_t library_ordered_by_id;
 };
 
+using Command_fp_t = void (*)(Database_t&);
+using Command_map_t = map<string, Command_fp_t>;
+
 // functions to handle command
 void find_Record_match_title(Database_t &database);
 void print_Record_match_id(Database_t &database);
@@ -84,7 +87,6 @@ bool check_Collection_empty (Collection collection);
 void free_Record(Record *record_ptr);
 
 // helper functions
-void handle_invalid_command(void);
 void discard_input_remainder(void);
 Ordered_by_id_lib_t::iterator probe_Record_by_id(int id, Ordered_by_id_lib_t &library);
 int read_and_check_integer();
@@ -93,7 +95,7 @@ void trim_title(string &title);
 void clear_Library_helper(Database_t &database);
 void clear_all_data_helper(Database_t &database);
 Ordered_by_id_lib_t::iterator read_ID_probe_Record(Ordered_by_id_lib_t &library);
-//Ordered_by_title_lib_t::iterator read_title_check_Record_exist(Ordered_by_title_lib_t &library);
+
 Ordered_by_title_lib_t::iterator read_title_probe_Record(Ordered_by_title_lib_t &library);
 
 Ordered_by_title_lib_t::iterator probe_Record_by_title(string title, Ordered_by_title_lib_t &library);
@@ -109,12 +111,52 @@ Catalog_t::iterator read_check_collection_name(Catalog_t &catalog);
 
 
 void insert_new_Record(Database_t &database, Record *new_record);
-//void print_Record_helper(Record *record);
+
+void load_command_map(Command_map_t& commands_map);
 
 int main ()
 {
-    Database_t database;
     map<string, void(*)(Database_t &)> commands_map;
+    load_command_map(commands_map);
+    Database_t database;
+    while (true) {
+        cout << endl << "Enter command: ";
+        char action, object;
+        cin >> action;
+        cin >> object;
+        string command;
+        command += action;
+        command += object;
+        try {
+            if (command == "qq") {
+                quit(database);
+                return 0;
+            }
+            else {
+                Command_fp_t cfp = commands_map[command];
+                if (cfp)
+                    cfp(database);
+                else {
+                    cout << "Unrecognized command!" << endl;
+                    discard_input_remainder();
+                    commands_map.erase(command);
+                }
+            }
+        } catch (Error& error) {
+            cout << error.msg << endl;
+            discard_input_remainder();
+        } catch (Title_exception& error) {
+            cout << error.msg << endl;
+        } catch (...) {
+            cout << "Unknown exception caught" <<endl;
+            return 1;
+        }
+    }
+    return 0;
+}
+
+void load_command_map(Command_map_t& commands_map)
+{
     commands_map.insert(make_pair("fr", find_Record_match_title));
     commands_map.insert(make_pair("pr", print_Record_match_id));
     commands_map.insert(make_pair("pc", print_Collection_match_name));
@@ -138,44 +180,8 @@ int main ()
     commands_map.insert(make_pair("cs", collection_statistics));
     commands_map.insert(make_pair("cc", combine_collections));
     commands_map.insert(make_pair("mt", modify_title));
-    while (true) {
-        char action, object;
-        cout << endl << "Enter command: ";
-        cin >> action;
-        cin >> object;
-        string command;
-        command += action;
-        command += object;
-        try {
-            if (command == "qq") {
-                quit(database);
-                return 0;
-            }
-            else if (commands_map.find(command) == commands_map.end()) {
-                handle_invalid_command();
-            }
-            else {
-                commands_map[command](database);
-            }
-        } catch (Error& error) {
-            cout << error.msg << endl;
-            discard_input_remainder();
-        } catch (Title_exception& error) {
-            cout << error.msg << endl;
-        } catch (...) {
-            cout << "Unknown exception caught" <<endl;
-            return 1;
-        }
-    }
-    return 0;
 }
 
-// Print error message for invalid comamnd and read to new line
-void handle_invalid_command(void)
-{
-    cout << "Unrecognized command!" << endl;
-    discard_input_remainder();
-}
 
 // Read to new line
 void discard_input_remainder(void)
@@ -558,36 +564,45 @@ string read_check_title()
 void trim_title(string &title)
 {
     replace_if(title.begin(), title.end(), static_cast<int (*)(int)>(isspace), ' ');
-    
-    //string trimmed_string(title.size(), ' ');
-    //unique_copy(title.begin(), title.end(), trimmed_string.begin(), [](char &a, char &b) {return a == b && a == ' ';});
-    
-    
     title.erase(unique(title.begin(), title.end(), [](char a, char b){return isspace(a) && isspace(b);}), title.end());
     size_t beginning = title.find_first_not_of(' ');
     if (beginning != string::npos)
         title = title.substr(beginning, title.find_last_not_of(' ') + 1 - beginning);
+    else
+        title = "";
 }
+
+
+
+class Find_string {
+public:
+    Find_string() : find_status(false) {}
+    void operator() (Record *record_ptr, string key_word)
+    {
+        string lower_title = record_ptr->get_title();
+        transform(lower_title.begin(), lower_title.end(), lower_title.begin(), tolower);
+        if (lower_title.find(key_word) != string::npos) {
+            find_status = true;
+            print_Record_helper(record_ptr);
+        }
+    }
+    bool get_find_status()
+    {return find_status;}
+private:
+    bool find_status;
+};
 
 
 void find_with_string(Database_t &database)
 {
     string key_word;
     cin >> key_word;
-    bool no_record_match = true;
     transform(key_word.begin(), key_word.end(), key_word.begin(), tolower);
-    for(Record *record_ptr: database.library_ordered_by_title) {
-        string lower_title = record_ptr->get_title();
-        transform(lower_title.begin(), lower_title.end(), lower_title.begin(), tolower);
-        if (lower_title.find(key_word) != string::npos) {
-            no_record_match = false;
-            print_Record_helper(record_ptr);
-        }
-    }
-    if (no_record_match)
+    Find_string find_str;
+    for_each(database.library_ordered_by_title.begin(), database.library_ordered_by_title.end(), bind(find_str, _1, ref(key_word)));
+    if (!find_str.get_find_status())
         throw Error("No records contain that string!");
 }
-
 
 
 
