@@ -45,9 +45,9 @@ public:
 	void clear()
         {members.clear();}
     
-    void get_collection_statist(Collection_Statist &statist) const;
+    void modify_member_title(Record *old_record, Record *new_record);
     
-    void modify_title(Record *old_record, Record *new_record);
+    void get_collection_statist(Collection_Statist &statist) const;
 
 	// Write a Collections's data to a stream in save format, with endl as specified.
 	void save(std::ostream& os) const;

@@ -28,8 +28,6 @@ using std::placeholders::_1;
 using std::bind; using std::mem_fn; using std::ref;
 using std::greater;
 
-
-
 using Ordered_by_title_lib_t = set<Record *, Compare_Record_ptr_title>;
 using Ordered_by_id_lib_t = vector<Record *>;
 using Catalog_t = vector<Collection>;
@@ -63,7 +61,6 @@ void clear_all_data(Database_t &database);
 void save_all_data(Database_t &database);
 void restore_all_data(Database_t &database);
 void quit(Database_t &database);
-
 void find_with_string(Database_t &database);
 void list_ratings(Database_t &database);
 void collection_statistics(Database_t &database);
@@ -71,18 +68,9 @@ void combine_collections(Database_t &database);
 void modify_title(Database_t &database);
 
 
-
-// function parameter for OC_apply_if_arg
-bool check_record_in_Collection (Collection collection, Record *arg_ptr);
-
-// function parameter for apply_if
-bool check_Collection_empty (Collection collection);
-
-// function parameter for apply
-void free_Record(Record *record_ptr);
-
 // helper functions
 void discard_input_remainder(void);
+
 Ordered_by_id_lib_t::iterator probe_Record_by_id(int id, Ordered_by_id_lib_t &library);
 int read_and_check_integer();
 string read_check_title();
@@ -410,11 +398,6 @@ void clear_Library(Database_t &database)
     cout <<"All records deleted" <<endl;
 }
 
-bool check_Collection_empty (Collection collection)
-{
-    return !collection.empty();
-}
-
 // clear the Catalog: destroy all of the collections in the Catalog,
 // and clear the Catalog
 void clear_Catalog(Database_t &database)
@@ -500,10 +483,6 @@ void restore_all_data(Database_t &database)
     }
 }
 
-void free_Record(Record *record_ptr)
-{
-    delete record_ptr;
-}
 
 // clear all data (as in cA), and also destroy the Library and Catalog
 // containers themselves, so that all memory is deallocated, and then terminate
@@ -652,7 +631,7 @@ void modify_title(Database_t &database)
     database.library_ordered_by_id.erase(library_id_iterator);
     insert_new_Record(database, new_record);
     
-    for_each(database.catalog.begin(), database.catalog.end(), bind(&Collection::modify_title, _1, ref(old_record), ref(new_record)));
+    for_each(database.catalog.begin(), database.catalog.end(), bind(&Collection::modify_member_title, _1, ref(old_record), ref(new_record)));
     cout <<"Title for record "<<old_record->get_ID()<< " changed to " << new_title <<endl;
     delete old_record;
 }

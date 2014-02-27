@@ -1,20 +1,16 @@
 #include "Collection.h"
 #include "Record.h"
-#include "Utility.h"
-#include <string>
 #include <fstream>
 #include <iostream>
 #include <algorithm>
 #include <iterator>
-#include <functional>
 
 
 using std::endl;
 using std::string;
 using std::set;
 using std::for_each; using std::copy; using std::set_union;
-using std::bind;
-using std::ostream_iterator; using std::inserter;
+using std::inserter;
 using std::ref;
 
 
@@ -63,7 +59,7 @@ void Collection::remove_member(Record* record_ptr)
         throw Error("Record is not a member in the collection!");
 }
 
-void Collection::modify_title(Record *old_record, Record *new_record)
+void Collection::modify_member_title(Record *old_record, Record *new_record)
 {
     if (is_member_present(old_record)) {
         members.erase(members.find(old_record));
@@ -71,6 +67,10 @@ void Collection::modify_title(Record *old_record, Record *new_record)
     }
 }
 
+void Collection::get_collection_statist(Collection_Statist &statist) const
+{
+    for_each(members.begin(), members.end(), ref(statist));
+}
 
 void Collection::save(std::ostream& os) const
 {
@@ -91,9 +91,6 @@ std::ostream& operator<< (std::ostream& os, const Collection& collection)
     return os;
 }
 
-void Collection::get_collection_statist(Collection_Statist &statist) const
-{
-    for_each(members.begin(), members.end(), ref(statist));
-}
+
 
 

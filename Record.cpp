@@ -41,7 +41,7 @@ void Record::save(std::ostream& os) const
 
 void Record::print(std::ostream& os) const
 {
-    os << this;
+    os << *this;
     os << endl;
 }
 

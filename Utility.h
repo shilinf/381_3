@@ -4,7 +4,6 @@
 
 #include "Record.h"
 #include <map>
-#include <iostream>
 #include <algorithm>
 
 // a simple class for error exceptions - msg points to a C-string error message
