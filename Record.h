@@ -66,13 +66,17 @@ public:
 	// Write a Record's data to a stream in save format with final endl.
 	// The record number is saved.
 	void save(std::ostream& os) const;
-
+    
+    // Print Record's data to the stream without a final endl.
+    // Output order is ID number followed by a ':' then medium, rating, title, separated by one space.
+    // If the rating is zero, a 'u' is printed instead of the rating.
+    void print(std::ostream& os) const;
+    
 	// This operator defines the order relation between Records, based just on the last title
 	bool operator< (const Record& rhs) const
         {return title < rhs.title;}
 
     friend std::ostream& operator<< (std::ostream& os, const Record& record);
-    //friend std::ostream& operator<< (std::ostream& os, const Record* record);
 private:
 	static int ID_counter; // must be initialized to zero.
     static int ID_counter_backup;
@@ -86,8 +90,5 @@ private:
 // Output order is ID number followed by a ':' then medium, rating, title, separated by one space.
 // If the rating is zero, a 'u' is printed instead of the rating.
 std::ostream& operator<< (std::ostream& os, const Record& record);
-
-//std::ostream& operator<< (std::ostream& os, const Record* record);
-
 
 #endif

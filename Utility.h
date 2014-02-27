@@ -8,7 +8,6 @@
 #include <algorithm>
 
 // a simple class for error exceptions - msg points to a C-string error message
-
 struct Error {
 	Error(const char* msg_ = "") :
 		msg(msg_)
@@ -22,20 +21,11 @@ struct Title_exception {
 	const char* msg;
 };
 
-// Compare two objects (passed by const&) using T's operator<
-template<typename T>
-struct Less_than_ref {
-	bool operator() (const T& t1, const T& t2) const {return t1 < t2;}
+// compare two records by title
+struct Compare_Record_ptr_title {
+    bool operator() (const Record* p1, const Record* p2) const
+    {return p1->get_title() < p2->get_title();}
 };
-
-// Compare two pointers (T is a pointer type) using *T's operator<
-template<typename T>
-struct Less_than_ptr {
-	bool operator()(const T p1, const T p2) const {return *p1 < *p2;}
-};
-
-//void print_Record_helper(Record *record, std::ostream& os = std::cout);
-void print_Record_helper(Record *record);
 
 class Collection_Statist {
 public:

@@ -9,7 +9,6 @@ The container of Records is not available to clients.
 
 #include "Utility.h"
 #include <string>
-#include <fstream>
 #include <set>
 
 class Record;
@@ -25,7 +24,7 @@ public:
 	No check made for whether the Collection already exists or not.
 	Throw Error exception if invalid data discovered in file.
 	string data input is read directly into the member variable. */
-    Collection(std::ifstream& is, const std::set<Record*, Less_than_ptr<Record*>>& library);
+    Collection(std::ifstream& is, const std::set<Record*, Compare_Record_ptr_title>& library);
     
     Collection(const Collection& c1, const Collection& c2, const std::string& name_);
 
@@ -60,7 +59,7 @@ public:
     friend std::ostream& operator<< (std::ostream& os, const Collection& collection);
     
 private:
-    std::set<Record*, Less_than_ptr<Record*>> members;
+    std::set<Record*, Compare_Record_ptr_title> members;
     std::string name;
 };
 

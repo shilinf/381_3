@@ -18,7 +18,7 @@ using std::ostream_iterator; using std::inserter;
 using std::ref;
 
 
-Collection::Collection(std::ifstream& is, const set<Record*, Less_than_ptr<Record*>>& library)
+Collection::Collection(std::ifstream& is, const set<Record*, Compare_Record_ptr_title>& library)
 {
     int num_records;
     if (!(is >> name >> num_records))
@@ -90,7 +90,6 @@ std::ostream& operator<< (std::ostream& os, const Collection& collection)
     }
     return os;
 }
-
 
 void Collection::get_collection_statist(Collection_Statist &statist) const
 {

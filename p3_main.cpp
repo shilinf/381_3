@@ -29,13 +29,8 @@ using std::bind; using std::mem_fn; using std::ref;
 using std::greater;
 
 
-// compare two records by ID
-struct Compare_Record_ID {
-    bool operator() (const Record* p1, const Record* p2) const
-        {return p1->get_ID() < p2->get_ID();}
-};
 
-using Ordered_by_title_lib_t = set<Record *, Less_than_ptr<Record *>>;
+using Ordered_by_title_lib_t = set<Record *, Compare_Record_ptr_title>;
 using Ordered_by_id_lib_t = vector<Record *>;
 using Catalog_t = vector<Collection>;
 
@@ -229,8 +224,7 @@ void print_Records(Database_t &database)
         cout << "Library is empty" << endl;
     else {
         cout << "Library contains " << database.library_ordered_by_title.size() << " records:" <<endl;
-        for_each(database.library_ordered_by_title.begin(), database.library_ordered_by_title.end(), print_Record_helper);
-        //for_each(database.library_ordered_by_title.begin(), database.library_ordered_by_title.end(), ostream_iterator<Record *>(cout));
+        for_each(database.library_ordered_by_title.begin(), database.library_ordered_by_title.end(), bind(&Record::print, _1, ref(cout)));
     }
 }
 
@@ -583,7 +577,7 @@ public:
         transform(lower_title.begin(), lower_title.end(), lower_title.begin(), tolower);
         if (lower_title.find(key_word) != string::npos) {
             find_status = true;
-            print_Record_helper(record_ptr);
+            record_ptr->print(cout);
         }
     }
     bool get_find_status()
@@ -614,7 +608,7 @@ void list_ratings(Database_t &database)
         map<int, list<Record *>, greater<int>> library_ordered_by_rate;
         for_each(database.library_ordered_by_title.begin(), database.library_ordered_by_title.end(), [&library_ordered_by_rate](Record *record_ptr){library_ordered_by_rate[record_ptr->get_rate()].push_back(record_ptr);});
         for (auto list_rating : library_ordered_by_rate)
-            for_each(list_rating.second.begin(), list_rating.second.end(), print_Record_helper);
+            for_each(list_rating.second.begin(), list_rating.second.end(), bind(&Record::print, _1, ref(cout)));
     }
 }
 
