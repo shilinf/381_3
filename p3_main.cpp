@@ -21,8 +21,9 @@ using std::ifstream; using std::ofstream;
 using std::isspace;
 using std::make_pair;
 using std::set; using std::list; using std::vector; using std::map;
-using std::find_if; using std::lower_bound; using std::for_each;
-using std::transform; using std::replace_if;
+using std::find_if; using std::find_if_not; using std::lower_bound;
+using std::for_each; using std::transform; using std::replace_if;
+using std::copy;
 using std::ostream_iterator;
 using std::bind; using std::mem_fn; using std::ref; using std::placeholders::_1;
 using std::greater;
@@ -492,20 +493,23 @@ void collection_statistics(Database_t &database)
 
 void combine_collections(Database_t &database)
 {
-    Catalog_t::iterator catalog_iterator1 = read_check_collection_name(database.catalog);
-    Catalog_t::iterator catalog_iterator2 = read_check_collection_name(database.catalog);
+    auto catalog_iterator1 = read_check_collection_name(database.catalog);
+    auto catalog_iterator2 = read_check_collection_name(database.catalog);
     string collection1_name = catalog_iterator1->get_name();
     string collection2_name = catalog_iterator2->get_name();
     string new_collection_name;
-    auto insert_position = read_check_new_collection_name(database.catalog, new_collection_name);
-    database.catalog.insert(insert_position, Collection(*catalog_iterator1, *catalog_iterator2, new_collection_name));
+    auto insert_position = read_check_new_collection_name(database.catalog,
+                                                          new_collection_name);
+    database.catalog.insert(insert_position, Collection(*catalog_iterator1,
+                                    *catalog_iterator2, new_collection_name));
     cout << "Collections "<< collection1_name<<" and "<< collection2_name
         <<" combined into new collection "<< new_collection_name << endl;
 }
 
 void modify_title(Database_t &database)
 {
-    auto library_id_iterator = read_ID_probe_Record(database.library_ordered_by_id);
+    auto library_id_iterator =
+            read_ID_probe_Record(database.library_ordered_by_id);
     string new_title = read_check_new_title_name(database.library_ordered_by_title);
     Record *old_record = *library_id_iterator;
     Record *new_record = new Record(*old_record, new_title);
